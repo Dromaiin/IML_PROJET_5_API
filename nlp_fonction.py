@@ -4,13 +4,11 @@ import re
 import nltk
 from nltk import pos_tag
 from nltk.stem import WordNetLemmatizer
-from sentence_transformers import SentenceTransformer
 from sklearn.feature_extraction.text import TfidfVectorizer
 import wordninja
 import pickle
 import numpy as np
 import warnings
-import gzip
 
 # Ignorer les avertissements de seaborn
 warnings.filterwarnings("ignore")
@@ -40,12 +38,6 @@ with open('stop_words.pkl', 'rb') as fichier:
 
 with open('classes_correspondance.pkl', 'rb') as fichier:
     classes_correspondance = pickle.load(fichier)
-
-with open('svm_classifier_model.pkl', 'rb') as model_file:
-    loaded_svm_classifier = pickle.load(model_file)
-
-with open('sgd_classifier_model.pkl', 'rb') as model_file:
-    loaded_sgd_classifier = pickle.load(model_file)
 
 with open('sgd_classifier_tfidf.pkl', 'rb') as model_file:
     loaded_sgd_classifier_tfidf = pickle.load(model_file)
@@ -251,39 +243,6 @@ def separate_words(text):
     return ' '.join(words)
 
 #-------------------------------------------------------------------------------------------
-
-def predict_tags(titre, body):
-
-
-    df_prep = pd.DataFrame(columns=['titre_clean', 'body_clean'])
-
-    df_prep['titre_clean'] = [titre]
-    df_prep['body_clean'] = [body]
-
-    df_prep['titre_clean'] = df_prep['titre_clean'].apply(clean_data_sup_verbe)
-    df_prep['body_clean'] = df_prep['body_clean'].apply(clean_data_sup_verbe)
-    df_prep['title_bode_clean'] = df_prep['titre_clean']+df_prep['body_clean']
-
-    model = SentenceTransformer('all-MiniLM-L6-v2')
-
-    sentences_test = df_prep['title_bode_clean'].tolist()  
-    embeddings_test_bert = model.encode(sentences_test, convert_to_tensor=True)
-
-    # Obtenez les probabilités prédites pour chaque classe pour l'ensemble d'entraînement
-    probabilities_test_bert = loaded_svm_classifier.predict_proba(embeddings_test_bert)
-
-    predict_proba_liste = probabilities_test_bert
-    nb_classes = 200
-    seuil_proba = 0.5
-    seuil_min = 0.1
-    #classes_correspondance = mlb.classes_
-
-    prediction_bert_svm_test = preditc_proba_seuil(predict_proba_liste, nb_classes, seuil_proba, seuil_min, classes_correspondance)
-
-    prediction_tags = prediction_bert_svm_test['classe_predite']
-
-    return prediction_tags[0]
-
 def predict_tags_tfidf(titre, body):
 
 
