@@ -6,3 +6,4 @@ pandas==2.0.3
 scikit_learn==1.2.2
 sentence_transformers==2.2.2
 wordninja==2.0.0
+gunicorn==21.2.0
